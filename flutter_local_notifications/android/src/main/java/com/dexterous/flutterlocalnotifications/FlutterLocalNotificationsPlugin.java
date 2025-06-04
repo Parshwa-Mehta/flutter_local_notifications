@@ -1665,26 +1665,34 @@ public class FlutterLocalNotificationsPlugin
   }
 
   private void getNotificationAppLaunchDetails(Result result) {
+    Log.d(TAG, "[flutter_local_notification package internal flow] getNotificationAppLaunchDetails() called");
     Map<String, Object> notificationAppLaunchDetails = new HashMap<>();
     Boolean notificationLaunchedApp = false;
     if (mainActivity != null) {
       Intent launchIntent = mainActivity.getIntent();
+      Log.d(TAG, "[flutter_local_notification package internal flow] Launch intent: " + (launchIntent != null ? launchIntent.getAction() : "null"));
       notificationLaunchedApp =
           launchIntent != null
               && (SELECT_NOTIFICATION.equals(launchIntent.getAction())
                   || SELECT_FOREGROUND_NOTIFICATION_ACTION.equals(launchIntent.getAction()))
               && !launchedActivityFromHistory(launchIntent);
+      Log.d(TAG, "[flutter_local_notification package internal flow] Notification launched app: " + notificationLaunchedApp);
       if (notificationLaunchedApp) {
+        Log.d(TAG, "[flutter_local_notification package internal flow] Extracting notification response from launch intent");
         notificationAppLaunchDetails.put(
             "notificationResponse", extractNotificationResponseMap(launchIntent));
       }
+    } else {
+      Log.d(TAG, "[flutter_local_notification package internal flow] Main activity is null");
     }
 
     notificationAppLaunchDetails.put(NOTIFICATION_LAUNCHED_APP, notificationLaunchedApp);
+    Log.d(TAG, "[flutter_local_notification package internal flow] Returning launch details: " + notificationAppLaunchDetails);
     result.success(notificationAppLaunchDetails);
   }
 
   private void initialize(MethodCall call, Result result) {
+    Log.d(TAG, "[flutter_local_notification package internal flow] Android plugin initialize() called");
     Map<String, Object> arguments = call.arguments();
     String defaultIcon = (String) arguments.get(DEFAULT_ICON);
     if (!isValidDrawableResource(
@@ -1694,14 +1702,17 @@ public class FlutterLocalNotificationsPlugin
 
     Long dispatcherHandle = LongUtils.parseLong(call.argument(DISPATCHER_HANDLE));
     Long callbackHandle = LongUtils.parseLong(call.argument(CALLBACK_HANDLE));
+    Log.d(TAG, "[flutter_local_notification package internal flow] Dispatcher handle: " + dispatcherHandle + ", Callback handle: " + callbackHandle);
     if (dispatcherHandle != null && callbackHandle != null) {
       new IsolatePreferences(applicationContext).saveCallbackKeys(dispatcherHandle, callbackHandle);
+      Log.d(TAG, "[flutter_local_notification package internal flow] Saved callback keys to isolate preferences");
     }
 
     SharedPreferences sharedPreferences =
         applicationContext.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
     SharedPreferences.Editor editor = sharedPreferences.edit();
     editor.putString(DEFAULT_ICON, defaultIcon).apply();
+    Log.d(TAG, "[flutter_local_notification package internal flow] Android plugin initialization completed successfully");
     result.success(true);
   }
 
@@ -1982,24 +1993,31 @@ public class FlutterLocalNotificationsPlugin
 
   @Override
   public boolean onNewIntent(Intent intent) {
+    Log.d(TAG, "[flutter_local_notification package internal flow] onNewIntent called with action: " + intent.getAction());
     boolean res = sendNotificationPayloadMessage(intent);
     if (res && mainActivity != null) {
+      Log.d(TAG, "[flutter_local_notification package internal flow] Setting intent on main activity");
       mainActivity.setIntent(intent);
     }
     return res;
   }
 
   private Boolean sendNotificationPayloadMessage(Intent intent) {
+    Log.d(TAG, "[flutter_local_notification package internal flow] sendNotificationPayloadMessage called with action: " + intent.getAction());
     if (SELECT_NOTIFICATION.equals(intent.getAction())
         || SELECT_FOREGROUND_NOTIFICATION_ACTION.equals(intent.getAction())) {
+      Log.d(TAG, "[flutter_local_notification package internal flow] Processing notification selection");
       Map<String, Object> notificationResponse = extractNotificationResponseMap(intent);
       if (SELECT_FOREGROUND_NOTIFICATION_ACTION.equals(intent.getAction())) {
+        Log.d(TAG, "[flutter_local_notification package internal flow] Processing foreground notification action");
         processForegroundNotificationAction(intent, notificationResponse);
       }
+      Log.d(TAG, "[flutter_local_notification package internal flow] Invoking didReceiveNotificationResponse with: " + notificationResponse);
       channel.invokeMethod("didReceiveNotificationResponse", notificationResponse);
       return true;
     }
 
+    Log.d(TAG, "[flutter_local_notification package internal flow] Intent action not recognized for notification handling");
     return false;
   }
 
