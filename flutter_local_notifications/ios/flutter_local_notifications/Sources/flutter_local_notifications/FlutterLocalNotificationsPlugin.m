@@ -10,16 +10,6 @@
   NSObject<FlutterPluginRegistrar> *_registrar;
   FlutterEngineManager *_flutterEngineManager;
   NSMutableDictionary *_launchNotificationResponseDict;
-  bool _requestSoundPermission;
-  bool _requestAlertPermission;
-  bool _requestBadgePermission;
-  bool _requestProvisionalPermission;
-  bool _requestCriticalPermission;
-  bool _displayAlert;
-  bool _playSound;
-  bool _updateBadge;
-  bool _presentBanner;
-  bool _presentList;
 }
 
 static FlutterPluginRegistrantCallback registerPlugins;
@@ -345,60 +335,82 @@ static FlutterError *getFlutterError(NSError *error) {
   }];
 }
 
-- (void)initialize:(NSDictionary *)arguments result:(FlutterResult)result {
-  NSLog(@"[flutter_local_notification package internal flow] iOS plugin initialize() called");
-  
+- (void)initialize:(NSDictionary *_Nonnull)arguments
+            result:(FlutterResult _Nonnull)result {
+  bool requestedSoundPermission = false;
+  bool requestedAlertPermission = false;
+  bool requestedBadgePermission = false;
+  bool requestedProvisionalPermission = false;
+  bool requestedCriticalPermission = false;
+  NSMutableDictionary *presentationOptions = [[NSMutableDictionary alloc] init];
+  if ([self containsKey:DEFAULT_PRESENT_ALERT forDictionary:arguments]) {
+    presentationOptions[PRESENT_ALERT] =
+        [NSNumber numberWithBool:[[arguments objectForKey:DEFAULT_PRESENT_ALERT]
+                                     boolValue]];
+  }
+  if ([self containsKey:DEFAULT_PRESENT_SOUND forDictionary:arguments]) {
+    presentationOptions[PRESENT_SOUND] =
+        [NSNumber numberWithBool:[[arguments objectForKey:DEFAULT_PRESENT_SOUND]
+                                     boolValue]];
+  }
+  if ([self containsKey:DEFAULT_PRESENT_BADGE forDictionary:arguments]) {
+    presentationOptions[PRESENT_BADGE] =
+        [NSNumber numberWithBool:[[arguments objectForKey:DEFAULT_PRESENT_BADGE]
+                                     boolValue]];
+  }
+  if ([self containsKey:DEFAULT_PRESENT_BANNER forDictionary:arguments]) {
+    presentationOptions[PRESENT_BANNER] = [NSNumber
+        numberWithBool:[[arguments objectForKey:DEFAULT_PRESENT_BANNER]
+                           boolValue]];
+  }
+  if ([self containsKey:DEFAULT_PRESENT_LIST forDictionary:arguments]) {
+    presentationOptions[PRESENT_LIST] =
+        [NSNumber numberWithBool:[[arguments objectForKey:DEFAULT_PRESENT_LIST]
+                                     boolValue]];
+  }
+  [[NSUserDefaults standardUserDefaults]
+      setObject:presentationOptions
+         forKey:PRESENTATION_OPTIONS_USER_DEFAULTS];
+  if ([self containsKey:REQUEST_SOUND_PERMISSION forDictionary:arguments]) {
+    requestedSoundPermission = [arguments[REQUEST_SOUND_PERMISSION] boolValue];
+  }
+  if ([self containsKey:REQUEST_ALERT_PERMISSION forDictionary:arguments]) {
+    requestedAlertPermission = [arguments[REQUEST_ALERT_PERMISSION] boolValue];
+  }
+  if ([self containsKey:REQUEST_BADGE_PERMISSION forDictionary:arguments]) {
+    requestedBadgePermission = [arguments[REQUEST_BADGE_PERMISSION] boolValue];
+  }
+  if ([self containsKey:REQUEST_PROVISIONAL_PERMISSION
+          forDictionary:arguments]) {
+    requestedProvisionalPermission =
+        [arguments[REQUEST_PROVISIONAL_PERMISSION] boolValue];
+  }
+  if ([self containsKey:REQUEST_CRITICAL_PERMISSION forDictionary:arguments]) {
+    requestedCriticalPermission =
+        [arguments[REQUEST_CRITICAL_PERMISSION] boolValue];
+  }
+
+  if ([self containsKey:@"dispatcher_handle" forDictionary:arguments] &&
+      [self containsKey:@"callback_handle" forDictionary:arguments]) {
+    [_flutterEngineManager
+        registerDispatcherHandle:arguments[@"dispatcher_handle"]
+                  callbackHandle:arguments[@"callback_handle"]];
+  }
+
+  // Configure the notification categories before requesting permissions
+  [self configureNotificationCategories:arguments
+                  withCompletionHandler:^{
+                    // Once notification categories are set up, the permissions
+                    // request will pick them up properly.
+                    [self requestPermissionsImpl:requestedSoundPermission
+                                 alertPermission:requestedAlertPermission
+                                 badgePermission:requestedBadgePermission
+                           provisionalPermission:requestedProvisionalPermission
+                              criticalPermission:requestedCriticalPermission
+                                          result:result];
+                  }];
+
   _initialized = true;
-  
-  if (arguments[REQUEST_SOUND_PERMISSION] != [NSNull null]) {
-    _requestSoundPermission = [arguments[REQUEST_SOUND_PERMISSION] boolValue];
-  }
-  if (arguments[REQUEST_ALERT_PERMISSION] != [NSNull null]) {
-    _requestAlertPermission = [arguments[REQUEST_ALERT_PERMISSION] boolValue];
-  }
-  if (arguments[REQUEST_BADGE_PERMISSION] != [NSNull null]) {
-    _requestBadgePermission = [arguments[REQUEST_BADGE_PERMISSION] boolValue];
-  }
-  if (arguments[REQUEST_PROVISIONAL_PERMISSION] != [NSNull null]) {
-    _requestProvisionalPermission = [arguments[REQUEST_PROVISIONAL_PERMISSION] boolValue];
-  }
-  if (arguments[REQUEST_CRITICAL_PERMISSION] != [NSNull null]) {
-    _requestCriticalPermission = [arguments[REQUEST_CRITICAL_PERMISSION] boolValue];
-  }
-  if (arguments[DEFAULT_PRESENT_ALERT] != [NSNull null]) {
-    _displayAlert = [arguments[DEFAULT_PRESENT_ALERT] boolValue];
-  }
-  if (arguments[DEFAULT_PRESENT_SOUND] != [NSNull null]) {
-    _playSound = [arguments[DEFAULT_PRESENT_SOUND] boolValue];
-  }
-  if (arguments[DEFAULT_PRESENT_BADGE] != [NSNull null]) {
-    _updateBadge = [arguments[DEFAULT_PRESENT_BADGE] boolValue];
-  }
-  if (@available(iOS 14.0, *)) {
-    if (arguments[DEFAULT_PRESENT_BANNER] != [NSNull null]) {
-      _presentBanner = [arguments[DEFAULT_PRESENT_BANNER] boolValue];
-    }
-    if (arguments[DEFAULT_PRESENT_LIST] != [NSNull null]) {
-      _presentList = [arguments[DEFAULT_PRESENT_LIST] boolValue];
-    }
-  }
-
-  NSLog(@"[flutter_local_notification package internal flow] iOS plugin permissions configured");
-
-  if (arguments[CALLBACK_DISPATCHER] != [NSNull null]) {
-    NSNumber *dispatcherHandle = arguments[CALLBACK_DISPATCHER];
-    NSLog(@"[flutter_local_notification package internal flow] Setting callback dispatcher handle: %@", dispatcherHandle);
-    [_flutterEngineManager setCallbackDispatcher:dispatcherHandle];
-  }
-
-  if (arguments[ON_NOTIFICATION_CALLBACK_DISPATCHER] != [NSNull null]) {
-    NSNumber *onNotificationCallbackDispatcher = arguments[ON_NOTIFICATION_CALLBACK_DISPATCHER];
-    NSLog(@"[flutter_local_notification package internal flow] Setting on notification callback dispatcher: %@", onNotificationCallbackDispatcher);
-    [_flutterEngineManager setOnNotificationCallbackDispatcher:onNotificationCallbackDispatcher];
-  }
-
-  NSLog(@"[flutter_local_notification package internal flow] iOS plugin initialization completed successfully");
-  result(@YES);
 }
 - (void)requestPermissions:(NSDictionary *_Nonnull)arguments
 
@@ -958,12 +970,8 @@ static FlutterError *getFlutterError(NSError *error) {
     didReceiveNotificationResponse:(UNNotificationResponse *)response
              withCompletionHandler:(void (^)(void))completionHandler
     API_AVAILABLE(ios(10.0)) {
-  NSLog(@"[flutter_local_notification package internal flow] iOS didReceiveNotificationResponse called");
-  NSLog(@"[flutter_local_notification package internal flow] Response action identifier: %@", response.actionIdentifier);
-  
   if (![self isAFlutterLocalNotification:response.notification.request.content
                                              .userInfo]) {
-    NSLog(@"[flutter_local_notification package internal flow] Not a Flutter local notification, ignoring");
     return;
   }
 
@@ -971,23 +979,18 @@ static FlutterError *getFlutterError(NSError *error) {
       [response.notification.request.identifier integerValue];
   NSString *payload =
       (NSString *)response.notification.request.content.userInfo[PAYLOAD];
-  NSLog(@"[flutter_local_notification package internal flow] Notification ID: %ld, Payload: %@", (long)notificationId, payload);
 
   if ([response.actionIdentifier
           isEqualToString:UNNotificationDefaultActionIdentifier]) {
-    NSLog(@"[flutter_local_notification package internal flow] Default action selected");
     if (_initialized) {
-      NSLog(@"[flutter_local_notification package internal flow] Plugin initialized, handling select notification");
       [self handleSelectNotification:notificationId payload:payload];
     } else {
-      NSLog(@"[flutter_local_notification package internal flow] Plugin not initialized, storing launch notification response");
       _launchNotificationResponseDict =
           [self extractNotificationResponseDict:response];
       _launchingAppFromNotification = true;
     }
     completionHandler();
   } else if (response.actionIdentifier != nil) {
-    NSLog(@"[flutter_local_notification package internal flow] Custom action selected: %@", response.actionIdentifier);
     NSMutableDictionary *notificationResponseDict =
         [self extractNotificationResponseDict:response];
     NSArray<NSString *> *foregroundActionIdentifiers =
@@ -995,18 +998,14 @@ static FlutterError *getFlutterError(NSError *error) {
             stringArrayForKey:FOREGROUND_ACTION_IDENTIFIERS];
     if ([foregroundActionIdentifiers indexOfObject:response.actionIdentifier] !=
         NSNotFound) {
-      NSLog(@"[flutter_local_notification package internal flow] Foreground action detected");
       if (_initialized) {
-        NSLog(@"[flutter_local_notification package internal flow] Invoking didReceiveNotificationResponse");
         [_channel invokeMethod:@"didReceiveNotificationResponse"
                      arguments:notificationResponseDict];
       } else {
-        NSLog(@"[flutter_local_notification package internal flow] Plugin not initialized, storing launch notification response");
         _launchNotificationResponseDict = notificationResponseDict;
         _launchingAppFromNotification = true;
       }
     } else {
-      NSLog(@"[flutter_local_notification package internal flow] Background action detected, starting engine");
       if (!actionEventSink) {
         actionEventSink = [[ActionEventSink alloc] init];
       }

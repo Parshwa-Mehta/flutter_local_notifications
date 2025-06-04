@@ -1,5 +1,3 @@
-// ignore_for_file: lines_longer_than_80_chars
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -118,187 +116,75 @@ class FlutterLocalNotificationsPlugin {
     DidReceiveBackgroundNotificationResponseCallback?
         onDidReceiveBackgroundNotificationResponse,
   }) async {
-    debugPrint(
-        '[flutter_local_notification package internal flow] FlutterLocalNotificationsPlugin.initialize() called');
-
     if (kIsWeb) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Running on web, returning true');
       return true;
     }
 
     if (defaultTargetPlatform == TargetPlatform.android) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Initializing for Android platform');
       if (initializationSettings.android == null) {
-        debugPrint(
-            '[flutter_local_notification package internal flow] Error: Android settings are null');
         throw ArgumentError(
             'Android settings must be set when targeting Android platform.');
       }
 
-      debugPrint(
-          '[flutter_local_notification package internal flow] Resolving Android platform-specific implementation');
-      final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
-          resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
-      debugPrint(
-          '[flutter_local_notification package internal flow] Android plugin resolved: ${androidPlugin != null ? 'success' : 'failed'}');
-
-      if (androidPlugin != null) {
-        debugPrint(
-            '[flutter_local_notification package internal flow] Calling Android platform initialize()');
-        final bool result = await androidPlugin.initialize(
-          initializationSettings.android!,
-          onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
-          onDidReceiveBackgroundNotificationResponse:
-              onDidReceiveBackgroundNotificationResponse,
-        );
-        debugPrint(
-            '[flutter_local_notification package internal flow] Android platform initialize() completed with result: $result');
-        return result;
-      } else {
-        debugPrint(
-            '[flutter_local_notification package internal flow] Android plugin is null, returning null');
-        return null;
-      }
+      return resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.initialize(
+        initializationSettings.android!,
+        onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
+        onDidReceiveBackgroundNotificationResponse:
+            onDidReceiveBackgroundNotificationResponse,
+      );
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Initializing for iOS platform');
       if (initializationSettings.iOS == null) {
-        debugPrint(
-            '[flutter_local_notification package internal flow] Error: iOS settings are null');
         throw ArgumentError(
             'iOS settings must be set when targeting iOS platform.');
       }
 
-      debugPrint(
-          '[flutter_local_notification package internal flow] Resolving iOS platform-specific implementation');
-      final IOSFlutterLocalNotificationsPlugin? iosPlugin =
-          resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>();
-      debugPrint(
-          '[flutter_local_notification package internal flow] iOS plugin resolved: ${iosPlugin != null ? 'success' : 'failed'}');
-
-      if (iosPlugin != null) {
-        debugPrint(
-            '[flutter_local_notification package internal flow] Calling iOS platform initialize()');
-        final bool? result = await iosPlugin.initialize(
-          initializationSettings.iOS!,
-          onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
-          onDidReceiveBackgroundNotificationResponse:
-              onDidReceiveBackgroundNotificationResponse,
-        );
-        debugPrint(
-            '[flutter_local_notification package internal flow] iOS platform initialize() completed with result: $result');
-        return result;
-      } else {
-        debugPrint(
-            '[flutter_local_notification package internal flow] iOS plugin is null, returning null');
-        return null;
-      }
+      return await resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>()
+          ?.initialize(
+        initializationSettings.iOS!,
+        onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
+        onDidReceiveBackgroundNotificationResponse:
+            onDidReceiveBackgroundNotificationResponse,
+      );
     } else if (defaultTargetPlatform == TargetPlatform.macOS) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Initializing for macOS platform');
       if (initializationSettings.macOS == null) {
-        debugPrint(
-            '[flutter_local_notification package internal flow] Error: macOS settings are null');
         throw ArgumentError(
             'macOS settings must be set when targeting macOS platform.');
       }
 
-      debugPrint(
-          '[flutter_local_notification package internal flow] Resolving macOS platform-specific implementation');
-      final MacOSFlutterLocalNotificationsPlugin? macosPlugin =
-          resolvePlatformSpecificImplementation<
-              MacOSFlutterLocalNotificationsPlugin>();
-      debugPrint(
-          '[flutter_local_notification package internal flow] macOS plugin resolved: ${macosPlugin != null ? 'success' : 'failed'}');
-
-      if (macosPlugin != null) {
-        debugPrint(
-            '[flutter_local_notification package internal flow] Calling macOS platform initialize()');
-        final bool? result = await macosPlugin.initialize(
-          initializationSettings.macOS!,
-          onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
-        );
-        debugPrint(
-            '[flutter_local_notification package internal flow] macOS platform initialize() completed with result: $result');
-        return result;
-      } else {
-        debugPrint(
-            '[flutter_local_notification package internal flow] macOS plugin is null, returning null');
-        return null;
-      }
+      return await resolvePlatformSpecificImplementation<
+              MacOSFlutterLocalNotificationsPlugin>()
+          ?.initialize(
+        initializationSettings.macOS!,
+        onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
+      );
     } else if (defaultTargetPlatform == TargetPlatform.linux) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Initializing for Linux platform');
       if (initializationSettings.linux == null) {
-        debugPrint(
-            '[flutter_local_notification package internal flow] Error: Linux settings are null');
         throw ArgumentError(
             'Linux settings must be set when targeting Linux platform.');
       }
 
-      debugPrint(
-          '[flutter_local_notification package internal flow] Resolving Linux platform-specific implementation');
-      final LinuxFlutterLocalNotificationsPlugin? linuxPlugin =
-          resolvePlatformSpecificImplementation<
-              LinuxFlutterLocalNotificationsPlugin>();
-      debugPrint(
-          '[flutter_local_notification package internal flow] Linux plugin resolved: ${linuxPlugin != null ? 'success' : 'failed'}');
-
-      if (linuxPlugin != null) {
-        debugPrint(
-            '[flutter_local_notification package internal flow] Calling Linux platform initialize()');
-        final bool? result = await linuxPlugin.initialize(
-          initializationSettings.linux!,
-          onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
-        );
-        debugPrint(
-            '[flutter_local_notification package internal flow] Linux platform initialize() completed with result: $result');
-        return result;
-      } else {
-        debugPrint(
-            '[flutter_local_notification package internal flow] Linux plugin is null, returning null');
-        return null;
-      }
+      return await resolvePlatformSpecificImplementation<
+              LinuxFlutterLocalNotificationsPlugin>()
+          ?.initialize(
+        initializationSettings.linux!,
+        onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
+      );
     } else if (defaultTargetPlatform == TargetPlatform.windows) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Initializing for Windows platform');
       if (initializationSettings.windows == null) {
-        debugPrint(
-            '[flutter_local_notification package internal flow] Error: Windows settings are null');
         throw ArgumentError(
             'Windows settings must be set when targeting Windows platform.');
       }
 
-      debugPrint(
-          '[flutter_local_notification package internal flow] Resolving Windows platform-specific implementation');
-      final FlutterLocalNotificationsWindows? windowsPlugin =
-          resolvePlatformSpecificImplementation<
-              FlutterLocalNotificationsWindows>();
-      debugPrint(
-          '[flutter_local_notification package internal flow] Windows plugin resolved: ${windowsPlugin != null ? 'success' : 'failed'}');
-
-      if (windowsPlugin != null) {
-        debugPrint(
-            '[flutter_local_notification package internal flow] Calling Windows platform initialize()');
-        final bool result = await windowsPlugin.initialize(
-          initializationSettings.windows!,
-          onNotificationReceived: onDidReceiveNotificationResponse,
-        );
-        debugPrint(
-            '[flutter_local_notification package internal flow] Windows platform initialize() completed with result: $result');
-        return result;
-      } else {
-        debugPrint(
-            '[flutter_local_notification package internal flow] Windows plugin is null, returning null');
-        return null;
-      }
+      return await resolvePlatformSpecificImplementation<
+              FlutterLocalNotificationsWindows>()
+          ?.initialize(
+        initializationSettings.windows!,
+        onNotificationReceived: onDidReceiveNotificationResponse,
+      );
     }
-    debugPrint(
-        '[flutter_local_notification package internal flow] No matching platform found, returning true');
     return true;
   }
 
@@ -316,63 +202,29 @@ class FlutterLocalNotificationsPlugin {
   /// for plugins to receive information on lifecycle events.
   Future<NotificationAppLaunchDetails?>
       getNotificationAppLaunchDetails() async {
-    debugPrint(
-        '[flutter_local_notification package internal flow] getNotificationAppLaunchDetails() called');
     if (kIsWeb) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Running on web, returning null');
       return null;
     }
     if (defaultTargetPlatform == TargetPlatform.android) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Getting Android launch details');
-      final NotificationAppLaunchDetails? result =
-          await resolvePlatformSpecificImplementation<
-                  AndroidFlutterLocalNotificationsPlugin>()
-              ?.getNotificationAppLaunchDetails();
-      debugPrint(
-          '[flutter_local_notification package internal flow] Android launch details result: $result');
-      return result;
+      return await resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.getNotificationAppLaunchDetails();
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Getting iOS launch details');
-      final NotificationAppLaunchDetails? result =
-          await resolvePlatformSpecificImplementation<
-                  IOSFlutterLocalNotificationsPlugin>()
-              ?.getNotificationAppLaunchDetails();
-      debugPrint(
-          '[flutter_local_notification package internal flow] iOS launch details result: $result');
-      return result;
+      return await resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>()
+          ?.getNotificationAppLaunchDetails();
     } else if (defaultTargetPlatform == TargetPlatform.macOS) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Getting macOS launch details');
-      final NotificationAppLaunchDetails? result =
-          await resolvePlatformSpecificImplementation<
-                  MacOSFlutterLocalNotificationsPlugin>()
-              ?.getNotificationAppLaunchDetails();
-      debugPrint(
-          '[flutter_local_notification package internal flow] macOS launch details result: $result');
-      return result;
+      return await resolvePlatformSpecificImplementation<
+              MacOSFlutterLocalNotificationsPlugin>()
+          ?.getNotificationAppLaunchDetails();
     } else if (defaultTargetPlatform == TargetPlatform.windows) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Getting Windows launch details');
-      final NotificationAppLaunchDetails? result =
-          await resolvePlatformSpecificImplementation<
-                  FlutterLocalNotificationsWindows>()
-              ?.getNotificationAppLaunchDetails();
-      debugPrint(
-          '[flutter_local_notification package internal flow] Windows launch details result: $result');
-      return result;
+      return await resolvePlatformSpecificImplementation<
+              FlutterLocalNotificationsWindows>()
+          ?.getNotificationAppLaunchDetails();
     } else {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Using default platform instance for launch details');
-      final NotificationAppLaunchDetails result =
-          await FlutterLocalNotificationsPlatform.instance
-                  .getNotificationAppLaunchDetails() ??
-              const NotificationAppLaunchDetails(false);
-      debugPrint(
-          '[flutter_local_notification package internal flow] Default launch details result: $result');
-      return result;
+      return await FlutterLocalNotificationsPlatform.instance
+              .getNotificationAppLaunchDetails() ??
+          const NotificationAppLaunchDetails(false);
     }
   }
 
@@ -385,68 +237,39 @@ class FlutterLocalNotificationsPlugin {
     NotificationDetails? notificationDetails, {
     String? payload,
   }) async {
-    debugPrint(
-        '[flutter_local_notification package internal flow] show() called with id: $id, title: $title, body: $body, payload: $payload');
-
     if (kIsWeb) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Running on web, skipping show()');
       return;
     }
     if (defaultTargetPlatform == TargetPlatform.android) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Showing notification on Android platform');
       await resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>()
           ?.show(id, title, body,
               notificationDetails: notificationDetails?.android,
               payload: payload);
-      debugPrint(
-          '[flutter_local_notification package internal flow] Android notification show() completed');
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Showing notification on iOS platform');
       await resolvePlatformSpecificImplementation<
               IOSFlutterLocalNotificationsPlugin>()
           ?.show(id, title, body,
               notificationDetails: notificationDetails?.iOS, payload: payload);
-      debugPrint(
-          '[flutter_local_notification package internal flow] iOS notification show() completed');
     } else if (defaultTargetPlatform == TargetPlatform.macOS) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Showing notification on macOS platform');
       await resolvePlatformSpecificImplementation<
               MacOSFlutterLocalNotificationsPlugin>()
           ?.show(id, title, body,
               notificationDetails: notificationDetails?.macOS,
               payload: payload);
-      debugPrint(
-          '[flutter_local_notification package internal flow] macOS notification show() completed');
     } else if (defaultTargetPlatform == TargetPlatform.linux) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Showing notification on Linux platform');
       await resolvePlatformSpecificImplementation<
               LinuxFlutterLocalNotificationsPlugin>()
           ?.show(id, title, body,
               notificationDetails: notificationDetails?.linux,
               payload: payload);
-      debugPrint(
-          '[flutter_local_notification package internal flow] Linux notification show() completed');
     } else if (defaultTargetPlatform == TargetPlatform.windows) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Showing notification on Windows platform');
       await resolvePlatformSpecificImplementation<
               FlutterLocalNotificationsWindows>()
           ?.show(id, title, body,
               details: notificationDetails?.windows, payload: payload);
-      debugPrint(
-          '[flutter_local_notification package internal flow] Windows notification show() completed');
     } else {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Using default platform instance for show()');
       await FlutterLocalNotificationsPlatform.instance.show(id, title, body);
-      debugPrint(
-          '[flutter_local_notification package internal flow] Default platform show() completed');
     }
   }
 
@@ -459,28 +282,15 @@ class FlutterLocalNotificationsPlugin {
   /// then the notification that matches both the id and the tag will
   /// be canceled. `tag` has no effect on other platforms.
   Future<void> cancel(int id, {String? tag}) async {
-    debugPrint(
-        '[flutter_local_notification package internal flow] cancel() called with id: $id, tag: $tag');
-
     if (kIsWeb) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Running on web, skipping cancel()');
       return;
     }
     if (defaultTargetPlatform == TargetPlatform.android) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Canceling notification on Android platform');
       await resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>()
           ?.cancel(id, tag: tag);
-      debugPrint(
-          '[flutter_local_notification package internal flow] Android notification cancel() completed');
     } else {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Canceling notification on default platform instance');
       await FlutterLocalNotificationsPlatform.instance.cancel(id);
-      debugPrint(
-          '[flutter_local_notification package internal flow] Default platform cancel() completed');
     }
   }
 
@@ -489,11 +299,7 @@ class FlutterLocalNotificationsPlugin {
   /// This applies to notifications that have been scheduled and those that
   /// have already been presented.
   Future<void> cancelAll() async {
-    debugPrint(
-        '[flutter_local_notification package internal flow] cancelAll() called');
     await FlutterLocalNotificationsPlatform.instance.cancelAll();
-    debugPrint(
-        '[flutter_local_notification package internal flow] cancelAll() completed');
   }
 
   /// Schedules a notification to be shown at the specified date and time
@@ -535,17 +341,10 @@ class FlutterLocalNotificationsPlugin {
     String? payload,
     DateTimeComponents? matchDateTimeComponents,
   }) async {
-    debugPrint(
-        '[flutter_local_notification package internal flow] zonedSchedule() called with id: $id, title: $title, scheduledDate: $scheduledDate, androidScheduleMode: $androidScheduleMode');
-
     if (kIsWeb) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Running on web, skipping zonedSchedule()');
       return;
     }
     if (defaultTargetPlatform == TargetPlatform.android) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Scheduling notification on Android platform');
       await resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>()!
           .zonedSchedule(
@@ -553,33 +352,21 @@ class FlutterLocalNotificationsPlugin {
               payload: payload,
               scheduleMode: androidScheduleMode,
               matchDateTimeComponents: matchDateTimeComponents);
-      debugPrint(
-          '[flutter_local_notification package internal flow] Android notification zonedSchedule() completed');
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Scheduling notification on iOS platform');
       await resolvePlatformSpecificImplementation<
               IOSFlutterLocalNotificationsPlugin>()
           ?.zonedSchedule(
               id, title, body, scheduledDate, notificationDetails.iOS,
               payload: payload,
               matchDateTimeComponents: matchDateTimeComponents);
-      debugPrint(
-          '[flutter_local_notification package internal flow] iOS notification zonedSchedule() completed');
     } else if (defaultTargetPlatform == TargetPlatform.macOS) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Scheduling notification on macOS platform');
       await resolvePlatformSpecificImplementation<
               MacOSFlutterLocalNotificationsPlugin>()
           ?.zonedSchedule(
               id, title, body, scheduledDate, notificationDetails.macOS,
               payload: payload,
               matchDateTimeComponents: matchDateTimeComponents);
-      debugPrint(
-          '[flutter_local_notification package internal flow] macOS notification zonedSchedule() completed');
     } else if (defaultTargetPlatform == TargetPlatform.windows) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Scheduling notification on Windows platform');
       await resolvePlatformSpecificImplementation<
               FlutterLocalNotificationsWindows>()
           ?.zonedSchedule(
@@ -590,11 +377,7 @@ class FlutterLocalNotificationsPlugin {
         notificationDetails.windows,
         payload: payload,
       );
-      debugPrint(
-          '[flutter_local_notification package internal flow] Windows notification zonedSchedule() completed');
     } else {
-      debugPrint(
-          '[flutter_local_notification package internal flow] zonedSchedule() not implemented for current platform');
       throw UnimplementedError('zonedSchedule() has not been implemented');
     }
   }
@@ -617,54 +400,31 @@ class FlutterLocalNotificationsPlugin {
     required AndroidScheduleMode androidScheduleMode,
     String? payload,
   }) async {
-    debugPrint(
-        '[flutter_local_notification package internal flow] periodicallyShow() called with id: $id, title: $title, repeatInterval: $repeatInterval');
-
     if (kIsWeb) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Running on web, skipping periodicallyShow()');
       return;
     }
     if (defaultTargetPlatform == TargetPlatform.android) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Setting up periodic notification on Android platform');
       await resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>()
           ?.periodicallyShow(id, title, body, repeatInterval,
               notificationDetails: notificationDetails.android,
               payload: payload,
               scheduleMode: androidScheduleMode);
-      debugPrint(
-          '[flutter_local_notification package internal flow] Android periodic notification setup completed');
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Setting up periodic notification on iOS platform');
       await resolvePlatformSpecificImplementation<
               IOSFlutterLocalNotificationsPlugin>()
           ?.periodicallyShow(id, title, body, repeatInterval,
               notificationDetails: notificationDetails.iOS, payload: payload);
-      debugPrint(
-          '[flutter_local_notification package internal flow] iOS periodic notification setup completed');
     } else if (defaultTargetPlatform == TargetPlatform.macOS) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Setting up periodic notification on macOS platform');
       await resolvePlatformSpecificImplementation<
               MacOSFlutterLocalNotificationsPlugin>()
           ?.periodicallyShow(id, title, body, repeatInterval,
               notificationDetails: notificationDetails.macOS, payload: payload);
-      debugPrint(
-          '[flutter_local_notification package internal flow] macOS periodic notification setup completed');
     } else if (defaultTargetPlatform == TargetPlatform.windows) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Windows does not support periodic notifications');
       throw UnsupportedError('Notifications do not repeat on Windows');
     } else {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Using default platform instance for periodic notification');
       await FlutterLocalNotificationsPlatform.instance
           .periodicallyShow(id, title, body, repeatInterval);
-      debugPrint(
-          '[flutter_local_notification package internal flow] Default platform periodic notification setup completed');
     }
   }
 
@@ -687,17 +447,10 @@ class FlutterLocalNotificationsPlugin {
     AndroidScheduleMode androidScheduleMode = AndroidScheduleMode.exact,
     String? payload,
   }) async {
-    debugPrint(
-        '[flutter_local_notification package internal flow] periodicallyShowWithDuration() called with id: $id, title: $title, duration: $repeatDurationInterval');
-
     if (kIsWeb) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Running on web, skipping periodicallyShowWithDuration()');
       return;
     }
     if (defaultTargetPlatform == TargetPlatform.android) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Setting up duration-based periodic notification on Android platform');
       await resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>()
           ?.periodicallyShowWithDuration(
@@ -705,46 +458,28 @@ class FlutterLocalNotificationsPlugin {
               notificationDetails: notificationDetails.android,
               payload: payload,
               scheduleMode: androidScheduleMode);
-      debugPrint(
-          '[flutter_local_notification package internal flow] Android duration-based periodic notification setup completed');
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Setting up duration-based periodic notification on iOS platform');
       await resolvePlatformSpecificImplementation<
               IOSFlutterLocalNotificationsPlugin>()
           ?.periodicallyShowWithDuration(
               id, title, body, repeatDurationInterval,
               notificationDetails: notificationDetails.iOS, payload: payload);
-      debugPrint(
-          '[flutter_local_notification package internal flow] iOS duration-based periodic notification setup completed');
     } else if (defaultTargetPlatform == TargetPlatform.macOS) {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Setting up duration-based periodic notification on macOS platform');
       await resolvePlatformSpecificImplementation<
               MacOSFlutterLocalNotificationsPlugin>()
           ?.periodicallyShowWithDuration(
               id, title, body, repeatDurationInterval,
               notificationDetails: notificationDetails.macOS, payload: payload);
-      debugPrint(
-          '[flutter_local_notification package internal flow] macOS duration-based periodic notification setup completed');
     } else {
-      debugPrint(
-          '[flutter_local_notification package internal flow] Using default platform instance for duration-based periodic notification');
       await FlutterLocalNotificationsPlatform.instance
           .periodicallyShowWithDuration(
               id, title, body, repeatDurationInterval);
-      debugPrint(
-          '[flutter_local_notification package internal flow] Default platform duration-based periodic notification setup completed');
     }
   }
 
   /// Returns a list of notifications pending to be delivered/shown.
-  Future<List<PendingNotificationRequest>> pendingNotificationRequests() {
-    debugPrint(
-        '[flutter_local_notification package internal flow] pendingNotificationRequests() called');
-    return FlutterLocalNotificationsPlatform.instance
-        .pendingNotificationRequests();
-  }
+  Future<List<PendingNotificationRequest>> pendingNotificationRequests() =>
+      FlutterLocalNotificationsPlatform.instance.pendingNotificationRequests();
 
   /// Returns the list of active notifications shown by the application that
   /// haven't been dismissed/removed.
@@ -759,9 +494,6 @@ class FlutterLocalNotificationsPlugin {
   /// On Windows, your application must be packaged as an MSIX to be able
   /// to use this API. If not, this function will return an empty list.
   /// For more details, see: https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/modernize-wpf-tutorial-5
-  Future<List<ActiveNotification>> getActiveNotifications() {
-    debugPrint(
-        '[flutter_local_notification package internal flow] getActiveNotifications() called');
-    return FlutterLocalNotificationsPlatform.instance.getActiveNotifications();
-  }
+  Future<List<ActiveNotification>> getActiveNotifications() =>
+      FlutterLocalNotificationsPlatform.instance.getActiveNotifications();
 }

@@ -43,10 +43,7 @@ public class ActionBroadcastReceiver extends BroadcastReceiver {
 
   @Override
   public void onReceive(Context context, Intent intent) {
-    Log.d(TAG, "[flutter_local_notification package internal flow] ActionBroadcastReceiver.onReceive() called with action: " + intent.getAction());
-    
     if (!ACTION_TAPPED.equalsIgnoreCase(intent.getAction())) {
-      Log.d(TAG, "[flutter_local_notification package internal flow] Action not recognized, ignoring");
       return;
     }
 
@@ -54,12 +51,10 @@ public class ActionBroadcastReceiver extends BroadcastReceiver {
 
     final Map<String, Object> action =
         FlutterLocalNotificationsPlugin.extractNotificationResponseMap(intent);
-    Log.d(TAG, "[flutter_local_notification package internal flow] Extracted notification response: " + action);
 
     if (intent.getBooleanExtra(FlutterLocalNotificationsPlugin.CANCEL_NOTIFICATION, false)) {
       int notificationId = (int) action.get(FlutterLocalNotificationsPlugin.NOTIFICATION_ID);
       Object tag = action.get(FlutterLocalNotificationsPlugin.NOTIFICATION_TAG);
-      Log.d(TAG, "[flutter_local_notification package internal flow] Cancelling notification ID: " + notificationId + ", tag: " + tag);
 
       if (tag instanceof String) {
         NotificationManagerCompat.from(context).cancel((String) tag, notificationId);
@@ -69,24 +64,19 @@ public class ActionBroadcastReceiver extends BroadcastReceiver {
     }
 
     if (actionEventSink == null) {
-      Log.d(TAG, "[flutter_local_notification package internal flow] Creating new ActionEventSink");
       actionEventSink = new ActionEventSink();
     }
     actionEventSink.addItem(action);
-    Log.d(TAG, "[flutter_local_notification package internal flow] Added action to event sink");
 
     startEngine(context);
   }
 
   private void startEngine(Context context) {
-    Log.d(TAG, "[flutter_local_notification package internal flow] startEngine() called");
-    
     if (engine != null) {
-      Log.e(TAG, "[flutter_local_notification package internal flow] Engine is already initialised");
+      Log.e(TAG, "Engine is already initialised");
       return;
     }
 
-    Log.d(TAG, "[flutter_local_notification package internal flow] Initializing Flutter engine for background isolate");
     FlutterInjector injector = FlutterInjector.instance();
     FlutterLoader loader = injector.flutterLoader();
 
@@ -94,24 +84,20 @@ public class ActionBroadcastReceiver extends BroadcastReceiver {
     loader.ensureInitializationComplete(context, null);
 
     engine = new FlutterEngine(context);
-    Log.d(TAG, "[flutter_local_notification package internal flow] Flutter engine created");
 
     /// This lookup needs to be done after creating an instance of `FlutterEngine` or lookup may
     // fail
     FlutterCallbackInformation dispatcherHandle = preferences.lookupDispatcherHandle();
     if (dispatcherHandle == null) {
-      Log.w(TAG, "[flutter_local_notification package internal flow] Callback information could not be retrieved");
+      Log.w(TAG, "Callback information could not be retrieved");
       return;
     }
-    Log.d(TAG, "[flutter_local_notification package internal flow] Retrieved dispatcher handle: " + dispatcherHandle.callbackName);
 
     DartExecutor dartExecutor = engine.getDartExecutor();
 
     initializeEventChannel(dartExecutor);
-    Log.d(TAG, "[flutter_local_notification package internal flow] Event channel initialized");
 
     String dartBundlePath = loader.findAppBundlePath();
-    Log.d(TAG, "[flutter_local_notification package internal flow] Executing Dart callback in background isolate");
     dartExecutor.executeDartCallback(
         new DartExecutor.DartCallback(context.getAssets(), dartBundlePath, dispatcherHandle));
   }
